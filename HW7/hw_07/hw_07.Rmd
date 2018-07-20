@@ -1,0 +1,209 @@
+---
+title: "Seventh Week: Generalized Linear Models"
+subtitle: "Murder or suicide"
+author: "مهبد مجید ۹۵۱۰۹۳۷۲"
+date: "`r Sys.time()`"
+output:
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
+---
+
+<div align="center">
+<img  src="images/giraffe-suicide-fail-cartoon.jpg"  align = 'center'>
+</div>
+
+> <p dir="RTL"> 
+با توجه به سوالات مرگ و میر در آمریکا به سوالات زیر پاسخ دهید.
+</p>
+
+```{r preprocess, message=FALSE, warning=FALSE, code=readLines("./../Solutions/0.R"), include=FALSE, paged.print=FALSE}
+```
+
+```{r theme, message=FALSE, warning=FALSE, code=readLines("./../Solutions/theme.R"), include=FALSE, paged.print=FALSE}
+```
+
+```{r theme, message=FALSE, warning=FALSE, code=readLines("./../Solutions/unbalanced_functions.R"), include=FALSE, paged.print=FALSE}
+```
+
+***
+
+<p dir="RTL">
+۱. از میان متغیرهای داده مرگ و میر یک زیرمجموعه ایی بدون حشو در نظر بگیرید.
+ماتریس همبستگی متغیرهای مختلف را به دست آورده و سپس رسم نمایید. علاوه بر این نمودار پراکنش متغیرهای انتخاب شده را همزمان نسبت به هم رسم نمایید.
+</p>
+
+```{r 1, fig.height=16, fig.width=16, message=FALSE, warning=FALSE, code=readLines("./../Solutions/1.R"), paged.print=FALSE}
+```
+
+***
+
+<p dir="RTL">
+۲. اثر هر یک از متغیرهای جنسیت، نژاد،آموزش، سن و نحوه تدفین را بر مرگ یا خودکشی ارزیابی کنید.
+</p>
+
+<p dir="RTL">
+از آنجایی که همه ی متغیرهای گفته شده فکتور هستند به جز سن،
+برای همه ی آن ها به جز سن از تست
+chi-squared
+استفاده می کنیم.
+همچنین برای سن از محاسبه ی رگرسیون لاجستیک و بررسی موثر بودن سن در آن استفاده می کنیم.
+نتیجه می شود که تمامی این عوامل موثرند.
+</p>
+
+```{r 2, fig.height=16, fig.width=16, message=FALSE, warning=FALSE, code=readLines("./../Solutions/2.R"), paged.print=FALSE}
+```
+
+***
+
+<p dir="RTL">
+۳. با استفاده از مدل رگرسیون لاجستیک یک مدل به داده ها برازش دهید و سپس آن را نقص یابی کنید.
+</p>
+
+
+```{r 3, fig.height=16, fig.width=16, message=FALSE, warning=FALSE, code=readLines("./../Solutions/3.R"), paged.print=FALSE}
+```
+
+<p dir="RTL">
+برای نقص یابی از ۴ نمودار استفاده می کنیم.
+نمودار بالا سمت راست نمودار 
+`normal-QQ`
+است که یاید روی یک خط باشد که هست.
+البته از آنجایی که مدلمان لاجیستیک است خیلی نمی توان از این برداشتی کرد.
+نمودار بالا سمت چپ نمودار
+`jackknife-deviance-residuals`
+و
+`fitted-values`
+است
+که باید فاقد پترنی مشخص باشد که اینگونه نیست.
+یعنی مدل ما مشکلات نرمال بود و احتمالن همگن بودن دارد.
+البته از آنجایی که مدلمان لاجیستیک است خیلی نمی توان از این برداشتی کرد.
+نمودار سمت چپ پایین 
+نمودار
+`Cook-statistics`
+و
+`leverage`
+که باید نقاطش در ناحیه ی مشخص شده باشد.
+در این نمودار نقاط هر چقدر بالاتر باشند
+تاثیر بیشتری در مدل دارند.
+نقاط سمت راست خط هم
+`leverage`
+بیشتری
+در مقایسه با
+`variance`
+باقیمانده ی خام در آن نقطه دارند.
+نمودار سمت راست پایین 
+نمودار
+`Cook-statistic`
+است
+که باید نقاطش در ناحیه ی مشخص شده باشد.
+این نمودار نشان می دهد که مشاهدات چقدر موثر هستند.
+از این نمودار می توان برای تشخیص
+`outlier`
+ها استفاده کرد.
+</p>
+
+<p dir="RTL">
+همچنین
+`hoslem-test`
+که برای بررسی خوب بودن فیت شدن مدل استفاده می شود به ما نشان می دهد که مدلمان خوب نیست.
+</p>
+
+<p dir="RTL">
+پس در مجموع مدل فیت شده شرایط رگرسیون را ندارد.
+</p>
+***
+
+<p dir="RTL">
+۴. با استفاده از سه نمودار خروجی مدل را نسبت به داده واقعی ارزیابی کنید.
+</p>
+
+<p dir="RTL">
+انواع خطاها را به همراه داده ها ترسیم می کنیم.
+</p>
+
+```{r 4, fig.height=16, fig.width=16, message=FALSE, warning=FALSE, code=readLines("./../Solutions/4.R"), paged.print=FALSE}
+```
+
+***
+
+<p dir="RTL">
+۵. ابتدا ۲۰ درصد داده را به صورت تصادفی به عنوان تست در نظر بگیرید. مدل را با استفاده از ۸۰ درصد باقی مانده برازش دهید. با استفاده از پارامتر قطع ۰.۵ نتایج را برای داده تست پیش بینی کنید. سپس کمیت های زیر را محاسبه کنید.
+</p>
+
+* P: positive samples
+* N: negative samples
+* TP: true positive TP (eqv. with hit)
+* TN: true negative (eqv. with correct rejection)
+* FP: false positive (eqv. with false alarm, Type I error)
+* FN: false negative (eqv. with miss, Type II error)
+* Accuracy (ACC) ACC = (TP+TN)/(P+T)
+* False positive rate (FPR): 1- TN/N
+* True positive rate (TPR): TP/P
+
+<p dir="RTL">
+مشابه آنچه در کلاس گفته شد نمایشی از  چهار کمیت 
+TN, TP,FP,FN
+به همراه داده ها رسم نمایید.
+</p>
+
+```{r 5, fig.height=16, fig.width=16, message=FALSE, warning=FALSE, code=readLines("./../Solutions/5.R"), paged.print=FALSE}
+```
+
+***
+
+<p dir="RTL">
+۶. نمودار صحت مدل (accuracy) را بر حسب مقادیر مختلف قطع برای داده تست رسم نمایید. کدام پارامتر قطع بالاترین صحت را در پیش بینی داراست؟
+</p>
+
+```{r 6, fig.height=16, fig.width=16, message=FALSE, warning=FALSE, code=readLines("./../Solutions/6.R"), paged.print=FALSE}
+```
+
+***
+
+<p dir="RTL">
+۷. نمودار 
+ROC
+ را برای داده های قسمت قبل رسم نمایید. همچنین نقطه مربوط به بهترین پارامتر قطع را مشخص نمایید.
+</p>
+
+```{r 7, fig.height=16, fig.width=16, message=FALSE, warning=FALSE, code=readLines("./../Solutions/7.R"), paged.print=FALSE}
+```
+
+***
+
+<p dir="RTL">
+۸. با قرار دادن کمیت 
+nfolds = 5
+و با استفاده از 
+H20
+مدل مساله را بسازید و نتیجه حاصل را ارزیابی کنید.
+</p>
+
+```{r 8, fig.height=16, fig.width=16, message=FALSE, warning=FALSE, code=readLines("./../Solutions/8.R"), paged.print=FALSE}
+```
+
+<p dir="RTL">
+خطای مدل را می توانید در 
+`confusion-matrix`
+مشاهده کنید
+چیزی حدود ۱۴ درصد است.
+</p>
+***
+
+<p dir="RTL"> 
+۹. آیا ما میتوانیم سرویسی به قضات ارایه کنیم تا با استفاده از اطلاعات مرگ بتوانند موارد مشکوک به قتل را از خودکشی تفکیک دهند؟
+</p>
+
+<p dir="RTL">
+بستگی به منظور سوال از ما دارد!
+اگر منظور سوال این است که همین مدلی که اینجا درست کرده ایم به قضات کمک کند،
+این کار خوبی نیست 
+زیرا خطای 
+کار ما
+برای کار قضایی زیاد است و مناسب نیست.
+ولی اگر بتوان این خطا را کمتر کرد می توان از مدل به دست آمده استفاده کرد.
+همچنین در همین دنیای امروز در آمریکا بعضن از متدهای یادگیری ماشین و هوش مصنوعی در قضاوت استفاده می شود.
+و در آینده هم انتظار می رود که جای قضات را بگیرند.
+</p>
+

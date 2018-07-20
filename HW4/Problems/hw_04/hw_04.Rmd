@@ -1,0 +1,303 @@
+---
+title: "Fourth Week: Hypothesis Testing"
+subtitle: "TIMSS Analysis"
+author: "مهبد مجید ۹۵۱۰۹۳۷۲"
+date: "`r Sys.time()`"
+output:
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
+---
+
+<div align="center">
+<img  src="images/math.jpg"  align = 'center'>
+</div>
+
+<h1 dir="RTL"> 
+تمرین سری چهارم: چقدر ریاضی بلدیم و چرا؟
+</h1>
+
+<p dir="RTL"> لطفا مقاله زیر را مطالعه بفرمایید. </p>
+<p dir="RTL">
+[چرایی رتبه ضعیف ایران در آزمون تیمز](https://goo.gl/gX8DZc)
+</p>
+
+> <p dir="RTL"> 
+با استفاده از داده های ارزیابی تیمز ۲۰۱۵ ادعاهای زیر را مورد ارزیابی قراردهید.
+برای هر سوال علاوه بر استدلال آماری که در غالب آزمون فرض تعریف می شود از تصویرسازی مناسب باهر دو ابزار
+ggplot2
+و
+highcharter
+استفاده نمایید.
+به دلخواه به هفت گزاره از موارد زیر پاسخ دهید.
+</p>
+
+<p dir = "RTL">
+پیش از شروع به حل کردن متوجه می شویم که نمرات به آن گونه ای که انتظار داشته ایم برای هر سوال داده نشده اند!
+برای اینکه داده ها  را به صورت قابل پذیرش به دست آوریم از چند تابع کمک می گیریم.
+البته در ادامه می بینیم که این کارها صرفا  به درد سوال ۶ می خورند!
+</p>
+
+
+```{r preprocess, message=FALSE, warning=FALSE, code=readLines("./Solutions/0.R"), paged.print=FALSE}
+```
+
+```{r theme, message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+theme_Publication <-
+  function(base_size = 14,
+           base_family = "Helvetica") {
+    library(grid)
+    library(ggthemes)
+    (
+      theme_foundation(base_size = base_size, base_family = base_family)
+      + theme(
+        plot.title = element_text(
+          face = "bold",
+          size = rel(1.2),
+          hjust = 0.5
+        ),
+        text = element_text(),
+        panel.background = element_rect(colour = NA),
+        plot.background = element_rect(colour = NA),
+        panel.border = element_rect(colour = NA),
+        axis.title = element_text(face = "bold", size = rel(1)),
+        axis.title.y = element_text(angle = 90, vjust = 2),
+        axis.title.x = element_text(vjust = -0.2),
+        axis.text = element_text(),
+        axis.line = element_line(colour = "black"),
+        axis.ticks = element_line(),
+        panel.grid.major = element_line(colour = "#f0f0f0"),
+        panel.grid.minor = element_blank(),
+        legend.key = element_rect(colour = NA),
+        legend.position = "bottom",
+        legend.direction = "horizontal",
+        legend.key.size = unit(0.2, "cm"),
+        legend.margin = unit(0, "cm"),
+        legend.title = element_text(face = "italic"),
+        plot.margin = unit(c(10, 5, 5, 5), "mm"),
+        strip.background = element_rect(colour = "#f0f0f0", fill =
+                                          "#f0f0f0"),
+        strip.text = element_text(face = "bold")
+      )
+    )
+    
+  }
+
+scale_fill_Publication <- function(...) {
+  library(scales)
+  discrete_scale("fill", "Publication", manual_pal(
+    values = c(
+      "#386cb0",
+      "#fdb462",
+      "#7fc97f",
+      "#ef3b2c",
+      "#662506",
+      "#a6cee3",
+      "#fb9a99",
+      "#984ea3",
+      "#ffff33"
+    )
+  ), ...)
+  
+}
+
+scale_colour_Publication <- function(...) {
+  library(scales)
+  discrete_scale("colour", "Publication", manual_pal(
+    values = c(
+      "#386cb0",
+      "#fdb462",
+      "#7fc97f",
+      "#ef3b2c",
+      "#662506",
+      "#a6cee3",
+      "#fb9a99",
+      "#984ea3",
+      "#ffff33",
+      "#e73157",
+      "#049bd9",
+      "#c70394",
+      "#30da63",
+      "#a71916",
+      "#7c092c",
+      "#d07ef6",
+      "#6f27a5",
+      "#de0bfb",
+      "#c0e03f",
+      "#bb74fc"
+    )
+  ), ...)
+}
+theme_set(theme_Publication())
+scale_colour_discrete <- scale_colour_Publication
+scale_fill_discrete <- scale_fill_Publication
+
+```
+
+***
+
+<p dir="RTL">
+۱. میران رضایت معلمان در پیشرفت تحصیلی دانش آموزان موثر است.
+</p>
+
+<p dir="RTL">
+برای پاسخگویی به این سوال ابتدا با جمع زدن چند شاخص رضایت شغلی معلمان معیاری کلی برای مشخص کردن سطح رضایت دست پیدا می کنیم.
+سپس با استفاده از کریلیشن تست و استفاده از متد اسپیرمن این ادعا را بررسی می کنیم.
+نتیجه ی آن هم این است که میزان رضایت معلمان با عملکرد دانش آموزان رابطه ی عکس دارد.
+</p>
+
+```{r 1, fig.height=9, fig.width=16, message=FALSE, warning=FALSE, code=readLines("./Solutions/1.R"), paged.print=FALSE}
+```
+
+
+***
+
+<p dir="RTL">
+۲. والدینی که تحصیلات بیشتری دارند دارای فرزندان موفق تری می باشند.
+</p>
+
+<p dir="RTL">
+ابتدا برای هر والد و هر فرزند یک سطر ایجاد می کنیم و میزان تحصیلات آن والد را جلوی آن می نویسیم.
+سپس با آنووا بررسی می کنیم که آیا تحصیلات موثر است یا نه.
+سپس با تی تست( از آنجایی که نمرات از توزیع  نرمال پیروزی می کنند می توان از تی تست استفاده کرد.)
+بیشترین سطح تحصیلات را با بقیه ی سطوح و همچنین کمترین سطح تحصیلات را با بقیه ی سطوح مقایسه می کنیم و مشاهده می کنیم که سطح تحصیلات موثر است.
+</p>
+
+```{r 2, fig.height=9, fig.width=16, message=FALSE, warning=FALSE, code=readLines("./Solutions/2.R"), paged.print=FALSE}
+```
+
+
+***
+
+<p dir="RTL">
+۳. امکانات رفاهی در خانه موجب پیشرفت تحصیلی می گردد.
+</p>
+
+<p dir="RTL">
+ابتدا با توجه به تعداد امکانات رفاهی موجود در منزل دانش آموز به آن یک عدد  نسبت می دهیم.
+سپس با آنوا بررسی می کنیم تا ببینیم آیا اصلن امکانات رفاهی تاثیری دارند یا نه.
+سپس با استفاده از تی تست میانگین افرادی که بیشترین سطح رفاه را دارند با بقیه مقایسه می کنیم و سپس هم میانگین افرادی که کمترین سطح رفاه را دارند.
+در نهایت مشاهده می کنیم که سطح امکانات رفاهی در خانه موثر است.
+</p>
+
+
+```{r 3, fig.height=9, fig.width=16, message=FALSE, warning=FALSE, code=readLines("./Solutions/3.R"), paged.print=FALSE}
+```
+
+
+***
+
+<p dir="RTL">
+۴. محیط آرام مدرسه نقش مهمی در پیشرفت تحصیلی دارد.
+</p>
+
+***
+
+<p dir="RTL">
+۵. معلمان با تحصیلات  بالاتر یا تجربه بیشتر دانش آموزان موفق تری تربیت می کنند.
+</p>
+
+***
+
+<p dir="RTL"> 
+۶. پسران در کاربرد هندسه قوی تر هستند.
+</p>
+
+<p dir="RTL"> 
+ابتدا با استفاده از تابعی که پیش از همه ی سوالات نوشته ایم نمرات افراد را بدست می آوریم.
+به پاسخ کامل نمره ی کامل، به پاسخ نصفه نصف نمره و به پاسخ غلط ۰ امتیاز تعلق گرفته است.
+همچنین وزن هر سوال حداکثر امتیاز ممکن از آن است.
+سپس چون نمرات تنها مربوط به کابرد هندسه هستند و سوالات کمی را شامل می شوند نمی توانیم از تی تست استفاده کنیم چون توزیع آن ها نرمال نمی شود.
+بنابراین از پرمیوتیشن تست استفاده می کنیم و در نهایت  مشاهده می کنیم که عملکرد پسر ها در کاربرد هندسه بهتر از دخترهاست.
+</p>
+
+```{r 6, fig.height=9, fig.width=16, message=FALSE, warning=FALSE, code=readLines("./Solutions/6.R"), paged.print=FALSE}
+```
+
+
+***
+
+<p dir="RTL"> 
+۷. تغذیه دانش آموزان نقش اساسی در یادگیری آنها دارد. 
+</p>
+
+<p dir="RTL">
+برای پاسخ دادن به این سوال از داده ی مربوط به صبحانه ی دانش آموزان استفاده می کنیم.
+به این صورت که ایتدا روی ۴ دسته آنووا می زنیم و مشاهده می کنیم که خوردن صبحانه موثر است.
+سپس برای بررسی تاثیر آن بیشترین و کمترین های صبحانه خوردن را جدا می کنیم و روی آن ها تی تست می زنیم.
+مشاهده می کنیم که کسانی که صبحانه بیش از بقیه می خورند عملکرد بهتری نسبت به بقیه دارند.
+ولی کسانی که صبحانه نمی خورند الزامن عملکرد بدتری ندارند(پی ولیو ۰.۰۸ است که برای اثبات کمتر بودن میانگین آن ها کافی نیست.).
+</p>
+
+
+```{r 7, fig.height=9, fig.width=16, message=FALSE, warning=FALSE, code=readLines("./Solutions/7.R"), paged.print=FALSE}
+```
+***
+
+<p dir="RTL"> 
+۸. مدارس با امکانات بیشتر دارای عملکرد بهتری می باشند.
+</p>
+
+***
+
+<p dir="RTL"> 
+۹. علت افت تحصیلی عدم مشارکت در کلاس است.
+</p>
+
+
+<p dir="RTL"> 
+برای حل این سوال پاسخ دانش آموزان به پرسش مربوط به حضور در کلاس را بررسی می کنیم و بر اساس پاسخ آنان آنان را به ۴ دسته تقسیم می کنیم و روی ۴ دسته آنووا می زنیم.
+سپس با استفاده از تی تست مشاهده می کنیم که کسانی که حضور در کلاس بیشتری دارند نسبت به بقیه عملکرد بهتری دارند. همچنین کسانی که کمترین سطح حضور در کلاس را دارند هم عملکرد بدتری نسبت به بقیه دارند.
+</p>
+
+```{r 9, fig.height=9, fig.width=16, message=FALSE, warning=FALSE, code=readLines("./Solutions/9.R"), paged.print=FALSE}
+```
+
+***
+
+<p dir="RTL"> 
+۱۰. دانش آموزان ایرانی در استدلال قوی تر از کاربرد هستند.
+</p>
+
+<p dir="RTL"> 
+۲
+دسته را جدا می کنیم و از آن جایی که معمولن توزیع نمرات از توزیع نرمال پیروی می کند از تی تست برای مقایسه ی میانگین ۲ دسته استفاده می کنیم.
+پی ولیوی نتایج حدودا ۰.۳ می شود که نتیجه می دهد شواهد کافی برای اثبات اینکه دانش آموزان ایرانی در استدلال قوی تر از کاربرد هستند وجود ندارد.
+</p>
+
+```{r 10, fig.height=9, fig.width=16, message=FALSE, warning=FALSE, code=readLines("./Solutions/10.R"), paged.print=FALSE}
+```
+
+***
+
+<p dir="RTL">
+سه گزاره جالب کشف کنید و ادعای خود را ثابت نمایید.
+</p>
+
+<p dir="RTL"> 
+ادعا می کنیم که برخلاف تصور موجود معلمینی که در روزهای بیشتری از هفته به دانش آموزان تمرین می دهند میانگین عملکرد بدتری نسبت به بقیه دارند.
+برای بررسی این موضوع از تی تست استفاده می کنیم.
+</p>
+
+```{r A, fig.height=9, fig.width=16, message=FALSE, warning=FALSE, code=readLines("./Solutions/A.R"), paged.print=FALSE}
+```
+
+***
+
+
+<p dir="RTL">
+در پرسشنامه قسمتی مربوط به گذراندن کلاس در خارج از محیط مدرسه بود و همچنین پرسشی هم از کسانی که در خارج از مدرسه کلاس می گذرانند شده بود که با چه هدفی در خارج از مدرسه کلاس می گذرانند.
+در این قسمت میانگین عملکرد دانش آموزانی که کلن کلاس بیرون از مدرسه نمی روند و کسانی را که ادعا کرده اند برای ممتاز بودن در کلاس های خارج از مدرسه شرکت می کنند را مقایسه می کنیم و با استفاده از تی تست مشاهده می کنیم که میانگین کسانی که کللن در کلاس های خارج از مدرسه شرکت نمی کنند بهتر است.
+</p>
+
+```{r B, fig.height=9, fig.width=16, message=FALSE, warning=FALSE, code=readLines("./Solutions/B.R"), paged.print=FALSE}
+```
+
+***
+
+<p dir="RTL">
+در این قسمت هم میانگین عملکرد مهاجرین را با میانگین عملکرد غیرمهاجرین از طریق تی تست مقایسه می کنیم و مشاهده می کنیم که مهاجرین به طور میانگین عملکرد بهتری در آزمون دارند.
+</p>
+
+```{r C, fig.height=9, fig.width=16, message=FALSE, warning=FALSE, code=readLines("./Solutions/C.R"), paged.print=FALSE}
+```

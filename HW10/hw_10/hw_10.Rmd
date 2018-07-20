@@ -1,0 +1,192 @@
+---
+title: "Cluster Analysis"
+subtitle: "WDI Indicators"
+author: "مهبد مجید ۹۵۱۰۹۳۷۲"
+date: "`r Sys.time()`"
+output:
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
+---
+
+<div align="center">
+<img  src="images/best_hans_talks_1200x627.jpg"  align = 'center'>
+</div>
+
+> <p dir="RTL"> 
+با توجه به داده بانک جهانی به سوالات زیر پاسخ دهید. برای استفاده از داده از سه فایل زیر استفاده نمایید.
+داده نام کشورها: WDICountry
+داده نام سری های زمانی: WDISeries
+داده کل: WDIData
+در صورتی که داده را در اختیار ندارید می توانید از بسته WDI استفاده نموده و داده های مورد نظر را استخراج نمایید.
+</p>
+
+
+<p dir="RTL">
+در اینجا پردازش های اولیه و توابع پراستفاده را می نویسیم.
+</p>
+
+
+```{r 0, echo=TRUE, fig.height=9, fig.width=16, message=FALSE, warning=FALSE, code=readLines("./../Solutions/0.R"), paged.print=FALSE}
+```
+
+```{r theme, message=FALSE, warning=FALSE, code=readLines("./../Solutions/theme.R"), include=FALSE, paged.print=FALSE}
+```
+
+
+***
+
+<p dir="RTL">
+۱. ده کشور فقیر دنیا را بیابید. نمودار درآمد روزانه آنها را رسم کنید. چند درصد از اعضای این کشورها زیر خط فقر هستند؟ متوسط عمر در این کشورها چقدر است؟
+</p>
+
+<p dir="RTL">
+می توانید مقدار مربوط به هر قسمت را با بردن موس روی قسمت مورد نظر ببینید.
+</p>
+
+```{r 1, echo=TRUE, fig.height=9, fig.width=16, message=FALSE, warning=FALSE, code=readLines("./../Solutions/1.R"), paged.print=FALSE}
+```
+
+***
+
+<p dir="RTL">
+۲. تراژدی روآندا: بر اساس داده های امید به زندگی ابتدا نمودار سالانه نمودار جعبه ایی امید به زندگی کشورها را رسم نمایید(در یک نمودار!). سپس سری زمانی امید به زندگی روآندا را به آن اضافه کنید. چه می بینید؟ چند میلیون نفر کشته شدند؟
+</p>
+
+```{r 2, echo=TRUE, fig.height=9, fig.width=16, message=FALSE, warning=FALSE, code=readLines("./../Solutions/2.R"), paged.print=FALSE}
+```
+
+***
+
+<p dir="RTL">
+۳. نمودار امید به زندگی و هزینه های بهداشتی را رسم کنید. چه نتیجه ایی می گیرید؟
+</p>
+
+```{r 3, echo=TRUE, fig.height=9, fig.width=16, message=FALSE, warning=FALSE, code=readLines("./../Solutions/3.R"), paged.print=FALSE}
+```
+
+***
+
+<p dir="RTL">
+۴. آیا قدرت خرید خانواده های ایرانی در ۵۰ سال اخیر افزایش یافته است؟ برای این کار از داده های اقتصادی خانوار استفاده کنید.
+</p>
+
+<p dir="RTL">
+بله ۳ برابر شده است.
+</p>
+
+
+```{r 4, echo=TRUE, fig.height=9, fig.width=16, message=FALSE, warning=FALSE, code=readLines("./../Solutions/4.R"), paged.print=FALSE}
+```
+
+
+***
+
+<p dir="RTL">
+۵. رشد اقتصادی ایران را با کشورهای دیگر در طول ۲۰ سال گذشته بر حسب بیست شاخص های اقتصادی مهم مانند تولید ناخالص ملی، تورم و … ارزیابی کنید! (برای هر شاخص از تصویرسازی استفاده کنید.)
+</p>
+
+<p dir="RTL">
+۲۰ شاخص اقتصادی خوب را برحسب بیشینه ی موجود بودن آن ها جدا می کنیم.
+</p>
+
+<p dir="RTL">
+خواهیم دید که وضعیت ایران در اکثر شاخص های اقتصادی با جهان متفاوت است و در اکثر موارد خیلی نزدیک به سایر جهان نیست.
+</p>
+
+```{r 5, echo=TRUE, fig.height=20, fig.width=20, message=FALSE, warning=FALSE, code=readLines("./../Solutions/5.R"), paged.print=FALSE}
+```
+
+<p dir="RTL">
+۶. در قسمت قبل با استفاده از روش خوشه بندی k-means داده ها را به سه دسته تقسیم کنید. ایران در کدام دسته می گنجد؟ (پیش از خوشه بندی طبیعتا داده را باید پاکسازی و استاندارد سازی نمایید.)
+</p>
+
+
+```{r 6, echo=TRUE, fig.height=16, fig.width=16, message=FALSE, warning=FALSE, code=readLines("./../Solutions/6.R"), paged.print=FALSE}
+```
+
+***
+
+<p dir="RTL">
+۷. به وسیله تحلیل مولفه اصلی بعد داده رو به دو کاهش دهید سپس خوشه های به دست آمده در قسمت قبل را بر روی آن نمایش دهید. آیا عملکرد روش خوشه بندی شما مطلوب بوده است؟
+</p>
+
+<p dir="RTL">
+بله مطلوب بوده است و به طور کلی اقتصاد های قوی تر در دسته ی سوم و اقتصاد های ضعیف تر در دسته ی اول و دوم هستند.
+</p>
+
+```{r 7, echo=TRUE, fig.height=9, fig.width=16, message=FALSE, warning=FALSE, code=readLines("./../Solutions/7.R"), paged.print=FALSE}
+```
+
+***
+
+<p dir="RTL">
+۸. با استفاده از داده روشی برای پیش بینی رشد اقتصادی ایران در سال آینده ارائه دهید.
+</p>
+
+```{r 8, echo=TRUE, fig.height=9, fig.width=16, message=FALSE, warning=FALSE, code=readLines("./../Solutions/8.R"), paged.print=FALSE}
+```
+
+***
+
+<p dir="RTL"> 
+۹. سوالهای ۵ تا ۷ را ابتدا برای ۲۰ شاخص سلامت سپس بر حسب ۲۰ شاخص آموزشی تکرار کنید.
+</p>
+
+```{r 9H5, echo=TRUE, fig.height=20, fig.width=20, message=FALSE, warning=FALSE, code=readLines("./../Solutions/9H5.R"), paged.print=FALSE}
+```
+
+```{r 9H6, echo=TRUE, fig.height=20, fig.width=20, message=FALSE, warning=FALSE, code=readLines("./../Solutions/9H6.R"), paged.print=FALSE}
+```
+
+```{r 9H7, echo=TRUE, fig.height=20, fig.width=20, message=FALSE, warning=FALSE, code=readLines("./../Solutions/9H7.R"), paged.print=FALSE}
+```
+
+<p dir="RTL">
+بله مطلوب بوده است و به طور کلی کشورهای با بهداشت بهتر در دسته ی دوم کشورهای با بهداشت معمولی در دسته ی سوم و کشورهای با بهداشت ضعیف تر در دسته ی اول هستند.
+</p>
+
+```{r 9E5, echo=TRUE, fig.height=20, fig.width=20, message=FALSE, warning=FALSE, code=readLines("./../Solutions/9E5.R"), paged.print=FALSE}
+```
+
+```{r 9E6, echo=TRUE, fig.height=20, fig.width=20, message=FALSE, warning=FALSE, code=readLines("./../Solutions/9E6.R"), paged.print=FALSE}
+```
+
+```{r 9E7, echo=TRUE, fig.height=20, fig.width=20, message=FALSE, warning=FALSE, code=readLines("./../Solutions/9E7.R"), paged.print=FALSE}
+```
+
+<p dir="RTL">
+بله مطلوب بوده است و به طور کلی کشورهای با آموزش بهتر در دسته ی دوم و کشورهای با آموزش متوسط در دسته ی سوم و کشورهای با آموزش ضعیف تر در دسته ی اول هستند.
+</p>
+
+***
+
+<p dir="RTL"> 
+۱۰. کشورهای دنیا را بر حسب ۶۰ شاخص اقتصادی، سلامت و آموزش با روش سلسله مراتبی خوشه بندی کرده و دندروگرام آن را رسم نمایید. اگر داده ها بر سه دسته تقسیم شوند ایران در کدام دسته می گنجد؟
+</p>
+
+
+```{r 10, echo=TRUE, fig.height=9, fig.width=16, message=FALSE, warning=FALSE, code=readLines("./../Solutions/10.R"), paged.print=FALSE}
+```
+
+
+***
+
+<p dir="RTL"> 
+۱۱. سه یافته جالب از داده ها استخراج کنید.
+</p>
+
+<p dir="RTL"> 
+یافته ی اول: کریلیشن مثبت درصد جمعیت شهری و امید به زندگی. برخلاف اینکه مردم فکر می کنند روستایی ها طول عمر بیشتری دارند.
+</p>
+
+<p dir="RTL"> 
+یافته ی دوم: کریلیشن منفی درصد زنانی که مدرک لیسانس دارند در جامعه و میانگین تعداد فرزندان زنان در جامعه.
+</p>
+
+<p dir="RTL"> 
+رابطه ی مثبت درصد محققین در جامعه و درآمد آن جامعه.
+</p>
+
+```{r 11, echo=TRUE, fig.height=9, fig.width=16, message=FALSE, warning=FALSE, code=readLines("./../Solutions/11.R"), paged.print=FALSE}
+```

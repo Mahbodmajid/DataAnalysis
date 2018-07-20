@@ -1,0 +1,368 @@
+---
+title: "first week: Introduction to R and Rstudio"
+author: "Mahbod Majid"
+date: "`r Sys.time()`"
+output:
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## P1
+```{r 1, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+## note that magical is actually semi-magical
+generateMagicOdd <- function(dim) {
+  m <- matrix(data = rep(0, dim * dim), ncol = dim)
+  row <- 0
+  col <- floor(dim / 2)
+  for (i in 1:(dim * dim)) {
+    m[row %% dim + 1, col %% dim + 1] <- i
+    row <- row - 1
+    col <- col + 1
+    if (i %% dim == 0) {
+      row <- row + 2
+      col <- col - 1
+    }
+  }
+  return(m)
+}
+generateMagicDoublyEven <- function(dim) {
+  m <- matrix(data = rep(0, dim * dim), ncol = dim)
+  for (i in 1:(dim * dim)) {
+    row <- floor((i - 1) / dim) + 1
+    col <- ((i - 1) %% dim) + 1
+    if ((((row %% 4 == 1) |
+          (row %% 4 == 0)) & (i %% 4 == 1 | i %% 4 == 0)) |
+        (((row %% 4 == 2) |
+          (row %% 4 == 3)) & (i %% 4 == 2 | i %% 4 == 3))) {
+      m[row, col] <- i
+    } else{
+      m[row, col] <- dim * dim - i + 1
+    }
+  }
+  return(m)
+}
+generateMagicSinglyEven <- function(dim) {
+  half <- dim / 2
+  smaller <- generateMagic(half)
+  m <- cbind(rbind(
+    cbind(smaller, smaller + 2 * half * half),
+    cbind(smaller + 3 * half * half, smaller + half * half)
+  ))
+  # by now it's columnwisely(!) magical
+  changes  <- half - 2
+  for(i in 1:changes){
+    for(j in 1:half){
+      temp <- m[j+half, i]
+      m[j+half, i] <- m[j, i]
+      m[j, i] <- temp
+    }
+  }
+  return(m)
+}
+generateMagic <- function(dim) {
+  if (dim %% 2 == 1) {
+    return(generateMagicOdd(dim))
+  }
+  if (dim %% 4 == 0) {
+    return(generateMagicDoublyEven(dim))
+  } else{
+    return(generateMagicSinglyEven(dim))
+  }
+}
+isMagic <- function(m) {
+  if (!is.matrix(m)) {
+    return(F)
+  }
+  if (nrow(m) != ncol(m)) {
+    return(F)
+  }
+  dim <- nrow(m)
+  value <- dim * (dim * dim + 1) / 2
+  for (i in 1:dim) {
+    if (sum(m[i,]) != value || sum(m[, i]) != value) {
+      return(F)
+    }
+  }
+  return(T)
+}
+generateMagic(4)
+generateMagic(5)
+generateMagic(6)
+```
+
+## P2
+
+`combinat::permn` is a function which generates all permutations from a list.
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+library(combinat)
+all <- 1:13
+first5 <- combn(all, 5, simplify = FALSE)
+for (p in first5) {
+  p <- permn(p)
+  for (a in p) {
+    if (a[1] * (a[3] + a[4] + a[5]) == (a[2] + a[3]) * (a[2] + a[3])) {
+      if (a[1] < a[2] + a[3]) {
+        second5 <- combn(all[!all %in% a], 5, simplify = FALSE)
+        for (q in second5) {
+          q <- permn(q)
+          for (b in q) {
+            x <- c(a, b)
+            if (x[6] * (x[7] + x[8] + x[9]) == (x[6] + x[7]) * (x[6] + x[7])) {
+              if (x[6] * (x[5] + x[9] + x[10]) == (x[6] + x[7]) * (x[7] + x[8] + x[9])) {
+                # x[6] is clearly lower tthan x[6] + x[7]
+                last3 <-
+                  combn(all[!all %in% x], 3, simplify = FALSE)
+                for (r in last3) {
+                  r <- permn(r)
+                  for (d in r) {
+                    y <- c(x, d)
+                    if ((y[11] + y[12]) * (y[13] + y[10]) == (y[12] + y[13]) *
+                        (y[12] + y[13])) {
+                      if (y[11] < y[13]) {
+                        print(y)
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+## P3
+
+### A
+
+```{r 3A, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+N <- 16
+validator1 <- function(p) {
+  for (i in 1:N) {
+    if (p[i %% N + 1] == F) {
+      if (p[(i + 1) %% N + 1] == T | p[(i - 1) %% N + 1] == T) {
+        ## do nothing
+      }
+      else{
+        return(F)
+      }
+    } else{
+      if (p[(i + 1) %% N + 1] == F & p[(i - 1) %% N + 1] == F) {
+        ## do nothing
+      }
+      else{
+        return(F)
+      }
+    }
+  }
+  return(T)
+}
+x <- rep(F, N)
+res <- NULL
+while (T) {
+  if (validator1(x)) {
+    #print(N - sum(x))
+    #print(x)
+    res <- c(res, N-sum(x))
+  }
+  i <- 1
+  flag <- T
+  while (T) {
+    if (i > N) {
+      flag <- F
+      break
+    }
+    if (x[i] == F) {
+      x[i] = T
+      break
+    }
+    else{
+      x[i] = F
+      i <-  i + 1
+      next
+    }
+  }
+  if(flag == F){
+    break
+  }
+}
+print(unique(res))
+```
+
+### B
+
+```{r 3B, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+N <- 12
+validator2 <- function(p) {
+  for (i in 1:N) {
+    if (p[i %% N + 1] == T) {
+      if ((p[(i + 1) %% N + 1] == F & p[(i - 1) %% N + 1] == T)|
+          (p[(i + 1) %% N + 1] == T & p[(i - 1) %% N + 1] == F)) {
+        ## do nothing
+      }
+      else{
+        return(F)
+      }
+    } else{
+      if ((p[(i + 1) %% N + 1] == F & p[(i - 1) %% N + 1] == F)|
+        (p[(i + 1) %% N + 1] == T & p[(i - 1) %% N + 1] == T)) {
+        ## do nothing
+      }
+      else{
+        return(F)
+      }
+    }
+  }
+  return(T)
+}
+x <- rep(F, N)
+res <- NULL
+while (T) {
+  if (validator2(x)) {
+    #print(N - sum(x))
+    #print(x)
+    res <- c(res, N-sum(x))
+  }
+  i <- 1
+  flag <- T
+  while (T) {
+    if (i > N) {
+      flag <- F
+      break
+    }
+    if (x[i] == F) {
+      x[i] = T
+      break
+    }
+    else{
+      x[i] = F
+      i <-  i + 1
+      next
+    }
+  }
+  if(flag == F){
+    break
+  }
+}
+print(unique(res))
+```
+
+### C
+
+`q` in `validation3` is a vector which determines whether the $i^{th}$ person belongs to the first group or the second one.
+
+```{r 3C, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+N <- 8
+validator3 <- function(p, q) {
+  for (i in 1:N) {
+    if (q[i] == T) {
+      if (p[i %% N + 1] == T) {
+        if ((p[(i + 1) %% N + 1] == F & p[(i - 1) %% N + 1] == T) |
+            (p[(i + 1) %% N + 1] == T & p[(i - 1) %% N + 1] == F)) {
+          ## do nothing
+        }
+        else{
+          return(F)
+        }
+      } else{
+        if ((p[(i + 1) %% N + 1] == F & p[(i - 1) %% N + 1] == F) |
+            (p[(i + 1) %% N + 1] == T & p[(i - 1) %% N + 1] == T)) {
+          ## do nothing
+        }
+        else{
+          return(F)
+        }
+      }
+    } else{
+      if (p[i %% N + 1] == F) {
+        if (p[(i + 1) %% N + 1] == T | p[(i - 1) %% N + 1] == T) {
+          ## do nothing
+        }
+        else{
+          return(F)
+        }
+      } else{
+        if (p[(i + 1) %% N + 1] == F & p[(i - 1) %% N + 1] == F) {
+          ## do nothing
+        }
+        else{
+          return(F)
+        }
+      }
+    }
+  }
+  return(T)
+}
+
+y <- rep(F, N)
+k <- 0
+set_4 <- list()
+while (T) {
+  if (sum(y) == (N / 2)) {
+    k <- k + 1
+    set_4[[k]] <- y
+  }
+  i <- 1
+  flag <- T
+  while (T) {
+    if (i > N) {
+      flag <- F
+      break
+    }
+    if (y[i] == F) {
+      y[i] = T
+      break
+    }
+    else{
+      y[i] = F
+      i <-  i + 1
+      next
+    }
+  }
+  if (flag == F) {
+    break
+  }
+}
+
+x <- rep(F, N)
+res <- NULL
+while (T) {
+  for (q in set_4) {
+    if (validator3(x, q)) {
+      #print(N - sum(x))
+      #print(x)
+      #print(q)
+      res <- c(res, N-sum(x))
+    }
+  }
+  i <- 1
+  flag <- T
+  while (T) {
+    if (i > N) {
+      flag <- F
+      break
+    }
+    if (x[i] == F) {
+      x[i] = T
+      break
+    }
+    else{
+      x[i] = F
+      i <-  i + 1
+      next
+    }
+  }
+  if (flag == F) {
+    break
+  }
+}
+print(unique(res))
+```

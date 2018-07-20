@@ -1,0 +1,607 @@
+---
+title: "second week: Introduction to R and Rstudio"
+subtitle: "Mobile Data"
+author: "مهبد مجید ۹۵۱۰۹۳۷۲"
+date: "`r Sys.time()`"
+output:
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
+---
+
+<div align="center">
+<img  src="images/smartphones.jpg"  align = 'center'>
+</div>
+
+<h1 dir="RTL"> 
+تمرین سری دوم: تلفن همراه شناسی!
+</h1>
+
+> <p dir="RTL"> 
+ با استفاده از داده های گوشی های همراه به سوالات زیر پاسخ دهید. 
+برای رسم نمودار از پکیج 
+ggplot2
+استفاده کنید.
+</p>
+
+```{r 0, include=FALSE}
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(knitr)
+library(kableExtra)
+mobile <- read_csv("../../../../../../../mobile_data.csv")
+
+theme_Publication <-
+  function(base_size = 14,
+           base_family = "Helvetica") {
+    library(grid)
+    library(ggthemes)
+    (
+      theme_foundation(base_size = base_size, base_family = base_family)
+      + theme(
+        plot.title = element_text(
+          face = "bold",
+          size = rel(1.2),
+          hjust = 0.5
+        ),
+        text = element_text(),
+        panel.background = element_rect(colour = NA),
+        plot.background = element_rect(colour = NA),
+        panel.border = element_rect(colour = NA),
+        axis.title = element_text(face = "bold", size = rel(1)),
+        axis.title.y = element_text(angle = 90, vjust = 2),
+        axis.title.x = element_text(vjust = -0.2),
+        axis.text = element_text(),
+        axis.line = element_line(colour = "black"),
+        axis.ticks = element_line(),
+        panel.grid.major = element_line(colour = "#f0f0f0"),
+        panel.grid.minor = element_blank(),
+        legend.key = element_rect(colour = NA),
+        legend.position = "bottom",
+        legend.direction = "horizontal",
+        legend.key.size = unit(0.2, "cm"),
+        legend.margin = unit(0, "cm"),
+        legend.title = element_text(face = "italic"),
+        plot.margin = unit(c(10, 5, 5, 5), "mm"),
+        strip.background = element_rect(colour = "#f0f0f0", fill =
+                                          "#f0f0f0"),
+        strip.text = element_text(face = "bold")
+      )
+    )
+    
+  }
+
+scale_fill_Publication <- function(...) {
+  library(scales)
+  discrete_scale("fill", "Publication", manual_pal(
+    values = c(
+      "#386cb0",
+      "#fdb462",
+      "#7fc97f",
+      "#ef3b2c",
+      "#662506",
+      "#a6cee3",
+      "#fb9a99",
+      "#984ea3",
+      "#ffff33"
+    )
+  ), ...)
+  
+}
+
+scale_colour_Publication <- function(...) {
+  library(scales)
+  discrete_scale("colour", "Publication", manual_pal(
+    values = c(
+      "#386cb0",
+      "#fdb462",
+      "#7fc97f",
+      "#ef3b2c",
+      "#662506",
+      "#a6cee3",
+      "#fb9a99",
+      "#984ea3",
+      "#ffff33"
+    )
+  ), ...)
+}
+theme_set(theme_Publication())
+scale_colour_discrete <- scale_colour_Publication
+scale_fill_discrete <- scale_fill_Publication
+
+```
+
+***
+
+<p dir="RTL">
+۱. کدام شرکت بیشترین تعداد گوشی را تولید کرده است؟
+نمودار ستونی ۲۰ شرکت برتر بر حسب تعداد گوشی تولید کرده را رسم کنید.
+</p>
+
+```{r 1, echo=TRUE, fig.height=9, fig.width=16, message=FALSE, warning=FALSE, paged.print=FALSE}
+
+companies <- mobile %>%
+  group_by(company) %>%
+  summarise(n = n())
+
+kable((companies %>%
+         top_n(n =  1, wt = n)))
+
+top_companies <- companies %>%
+  top_n(n =  20, wt = n)
+
+top_companies$company <-
+  factor(top_companies$company,
+         levels = top_companies$company[order(top_companies$n)])
+
+ggplot(top_companies, aes(x = company, y = n, fill = n)) +
+  geom_bar(stat = "identity") +
+  guides(fill = F) +
+  xlab("Company") +
+  ylab("No. of Devices")
+```
+
+
+***
+
+<p dir="RTL">
+۲. نمودار زمانی طول عرض  ضخامت و کیفیت دوربین گوشی ها را بکشید
+ و به نمودار هر یک مدل خطی اضافه کنید.
+</p>
+
+```{r 2, echo=TRUE, fig.height=9, fig.width=16, message=FALSE, warning=FALSE, paged.print=FALSE}
+ggplot(data = mobile, aes(x = year, y = dim_breadth)) +
+  geom_point() +
+  geom_smooth(method = "lm", na.rm = T) +
+  ylab("Breadth") +
+  xlab("Year")
+
+ggplot(data = mobile, aes(x = year, y = cam_px)) +
+  geom_point() +
+  geom_smooth(method = "lm", na.rm = T) +
+  ylab("Camera (px)") +
+  xlab("Year")
+
+ggplot(data = mobile, aes(x = year, y = dim_thickness)) +
+  geom_point() +
+  geom_smooth(method = "lm", na.rm = T) +
+  ylab("Thickness") +
+  xlab("Year")
+
+ggplot(data = mobile, aes(x = year, y = dim_length)) +
+  geom_point() +
+  geom_smooth(method = "lm", na.rm = T) +
+  ylab("Length") +
+  xlab("Year")
+```
+
+***
+
+<p dir="RTL">
+۳. نمودار ستونی متوسط قیمت گوشی بر حسب تعداد سیم کارت و دسترسی به 
+LTE
+را رسم نمایید.
+</p>
+
+```{r 3, echo=TRUE, fig.height=9, fig.width=16, message=FALSE, warning=FALSE, paged.print=FALSE}
+mob_sim_lte = mobile %>%
+  group_by(LTE, sim_no) %>%
+  summarise(avg_price = mean(price, na.rm = T))
+ggplot(mob_sim_lte, aes(x = sim_no, y = avg_price, fill = LTE)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  xlab("SIM No.") +
+  ylab("Avg. Price") +
+  ggtitle("Avg. Price ~ SIM No. & LTE")
+```
+
+
+***
+
+<p dir="RTL">
+۴. نمودار جعبه ایی ضحامت گوشی هایی که در سال ۲۰۱۷ معرفی شده اند را برحسب اینکه کمیت جک هدفون رسم نمایید
+</p>
+```{r 4, fig.height=9, fig.width=16, message=FALSE, warning=FALSE, paged.print=FALSE}
+ggplot(mobile %>% filter(!is.na(audio_jack), !is.na(dim_thickness)),
+       aes(audio_jack, dim_thickness)) +
+       geom_boxplot() +
+       ylab("Thickness") +
+       xlab("Audio Jack") +
+       ggtitle("Thickness ~ Audio Jack")
+```
+
+***
+
+<p dir="RTL">
+۵. مفهوم 
+ppi 
+را در گوشی های موبایل محاسبه و هیستوگرام آن را رسم نمایید.
+همچنین نمودار سالانه متوسط این کمیت را بکشید.
+کدام گوشی بیشترین
+ppi
+را دارد؟
+</p>
+
+```{r 5, fig.height=9, fig.width=16, message=FALSE, warning=FALSE, paged.print=FALSE}
+mobile_ppi <- mobile
+mobile_ppi$ppi <- sqrt((mobile$px_col * mobile$px_col) +
+                         (mobile$px_row * mobile$px_row)) / mobile$display_size
+ggplot(mobile_ppi, aes(x = ppi, y = ..count.., fill ="")) +
+  geom_histogram(bins = 40)
+
+mobile_ppi_year <- mobile_ppi %>%
+  group_by(year) %>%
+  summarise(avg_ppi = mean(ppi, na.rm = T))
+
+ggplot(mobile_ppi_year, aes(x = year, y = avg_ppi, fill = avg_ppi)) +
+  geom_bar(stat = "identity") +
+  xlab("Year") +
+  ylab("Avg. PPI") +
+  ggtitle("Avg. PPI ~ Year")+
+  guides(fill = F)
+
+highest_ppi <- mobile_ppi[which.max(mobile_ppi$ppi),]
+kable(highest_ppi %>% 
+        select(company, device, year, ppi))
+```
+
+***
+
+<p dir="RTL">
+۶. در گذشته به بعضی از مدل های گوشی نوکیا 
+**گوشکوب**
+گفته می شد. سعی کنید برای این مفهوم کمیتی مناسب تعریف کنید .
+ ده گوشکوب برتر را پیدا کرده و نمودار گوشکوبیت آن را رسم نمایید.
+</p>
+
+<p dir = "RTL">
+خب برای حل این سوال ابتدا می بینیم گوشی های نوکیای قدیمی چه خاصیتی داشتند که با آن ها گوشکوب می گفتیم!
+</p>
+<p dir = "RTL">
+اولین خاصیتی که به ذهن می رسد
+این است که به هیچ
+دردی جز گوشگوب
+بودن نمی خوردند!
+یعنی
+CPU
+و
+RAM
+و
+GPU
+و کارت حافظه
+نداشتند و کم امکانات بودند.
+نکته ی بعدی که به ذهن
+می رسد
+این است
+که این گوشی ها
+اکثرن اجسام نسبت سلبی بودند 
+و در برخورد ها اصولن 
+صدمه ای نمی دیدند،
+این امر
+می تواند
+ناشی از چگالی بالای
+آن ها باشد.
+پس یعنی:
+</p>
+$$ \text{Gooshkoobiat} \propto \text{Density}$$
+<p dir = "RTL">
+هم چنین این گوشی ها
+اکثرن گوشی های
+ارزان
+قیمتی بودند پس:
+</p>
+$$ \text{Gooshkoobiat} \propto \text{Price}^{-1}$$
+<p dir = "RTL">
+پس در کل برای یافتن
+این گوشی ها از کمیت
+زیر استفاده می کنیم:
+</p>
+$$\text{Gooshkoobiat} \propto \frac{\text{Density}}{\text{Price}}$$
+
+```{r 6, fig.height=9, fig.width=16, message=FALSE, warning=FALSE, paged.print=FALSE}
+mob_gk <- mobile %>%
+  filter(
+    LTE == "No",
+    nfc == "No",
+    gps == "No",
+    wlan == "No",
+    is.na(os_type),
+    is.na(cpu),
+    is.na(gpu),
+    is.na(ram),
+    is.na(card_slot) | card_slot == "No"
+  )
+
+mob_gk$gk <- mob_gk$weight /
+  (mob_gk$dim_length * mob_gk$dim_breadth * mob_gk$dim_thickness * mob_gk$price) *
+  10000
+
+mob_gk <- mob_gk %>%
+  top_n(n = 10,  wt = gk)
+
+mob_gk$company_device <-  paste(mob_gk$company, mob_gk$device)
+
+mob_gk$company_device <-
+  factor(mob_gk$company_device,
+         levels = mob_gk$company_device[order(mob_gk$gk)])
+
+ggplot(mob_gk, aes(x = company_device, y = gk, fill = gk)) +
+  geom_bar(stat = "identity") +
+  xlab("Device Name") +
+  ylab("Gooshkoobiat")
+
+```
+
+***
+
+<p dir="RTL">
+۷. آیا تلفن همراهی وجود دارد که در آب غرق نشود؟
+اگر جواب بله هست تمام گوشی های که این خاصیت را دارند بیابید.
+با کشیدن یک نمودار به این سوال پاسخ دهید.
+</p>
+
+```{r 7, fig.height=9, fig.width=16, message=FALSE, warning=FALSE, paged.print=FALSE}
+mob_density <- mobile
+mob_density$density <-
+  1000  * mob_density$weight / (mob_density$dim_length *
+                                  mob_density$dim_breadth *
+                                  mob_density$dim_thickness) # in gr / cm^3 (water is  1)
+mob_float <- mob_density %>%
+  filter(density < 1)
+kable(mob_float %>%
+        select(company, device, year, density), "html") %>%
+  scroll_box(height = "5in")
+
+ggplot(mob_density, aes(x = density, y = ..count.., fill = density < 1)) +
+  geom_histogram(breaks = seq(0, 4, 0.1)) +
+  geom_vline(xintercept = 1) +
+  scale_x_continuous(limits = c(0, 4)) +
+  coord_flip() +
+  xlab("Density") +
+  ylab("Count")
+```
+
+***
+
+<p dir="RTL">
+۸. نمودار پراکنش حجم ذخیره سازی باطری و وزن را رسم نمایید.
+میزان همبستگی بین این دو کمیت را محاسبه کنید.
+</p>
+
+```{r 8, fig.height=12, fig.width=16, message=FALSE, warning=FALSE, paged.print=FALSE}
+valid_mob <- mobile %>%
+  filter(!is.na(battery_mah), !is.na(weight))
+
+ggplot(valid_mob,
+       aes(
+         x = battery_mah,
+         y = weight,
+         color = -battery_mah,
+         size = weight
+       )) +
+  geom_point(na.rm = T) +
+  xlab("Battery (m A.h)") +
+  ylab("Weight (g)") +
+  guides(color = F, size = F)
+
+cor(valid_mob$battery_mah, valid_mob$weight)
+  
+```
+
+***
+
+<p dir="RTL">
+۹. قیمت پرچمداران یک برند خاص مثلا سامسونگ را بیابید و نمودار قیمت زمان و نام مدل را رسم نمایید.
+</p>
+
+<p dir = "RTL">
+برای پیدا کردن پرچم دارن
+سامسونگ در هر سال ۴ گوشی هایی
+از این برند که گران تر هستند
+را جدا می کنیم
+و در نمودارمان نشان می دهیم
+</p>
+
+```{r 9, fig.height=9, fig.width=16, message=FALSE, warning=FALSE, paged.print=FALSE}
+samsung <- mobile  %>% 
+  filter(company == "Samsung") %>% 
+  group_by(year) %>% 
+  top_n(n = 4, wt = price) %>% 
+  ungroup()
+
+ggplot(samsung, aes(x = year, y = price, label = device))+
+  geom_text(check_overlap = T)+
+  scale_x_continuous(limits  = c(2004, 2018))+
+  xlab("Year")+
+  ylab("Price")
+```
+
+***
+
+<p dir="RTL">
+۱۰. سه نمودار جالب رسم کنید و توضیح دهید چرا از نظر شما جالب است؟
+</p>
+
+<p dir="RTL">
+در این نمودار بررسی می کنیم تا ببینیم اگر یک فرد بیاید و به ما بگوید هموزن دیوایس ما به ما طلا یا پلاتینیوم میدهد می ارزد که آن را عوض کنیم یا نه!
+برای این کار نسبت قیمت به وزن را برای هر کدام از دستگاه ها محاسبه می کنیم و با قیمت طلا و پلاتین مقایسه می کنیم و در نهایت دستگاه هایی را که بیشترین ارزش را دارند نمایش می دهیم.
+</p>
+
+<p dir="RTL">
+همچنین در این نمودار به دلیل درست نبودن واحد پول در برخی دستگاه های سال ۲۰۱۷ از تمامی دستگاه های سال ۲۰۱۷ صرف نظر شده.
+</p>
+
+<p dir="RTL">
+به این دلیل هم به نظرم جالبه که خب مسئله ی بامزه ایه کلا که ببینیم ممکنه اصلا یه دیوایسی باشه که  اگر که هم وزنش طلا یا پلاتین  داشته باشیم ارزشش کمتر بشه، که از قضا همچین دیوایسایی وجود دارن. و اکثرشون هم اپل واچ و گوشی های
+Vertu
+هستند.
+</p>
+
+```{r 10_A, fig.height=12, fig.width=16, message=FALSE, warning=FALSE, paged.print=FALSE}
+mob_worth <- mobile
+mob_worth <- mob_worth %>%
+  filter(!is.na(price),
+         !is.na(weight),
+         year < 2017)
+mob_worth$worth <- mob_worth$price / mob_worth$weight
+top_mob_worth <- mob_worth %>%
+  arrange(desc(worth)) %>%
+  head(20) %>%
+  select(company, device, worth)
+top_mob_worth$company_device <-
+  paste(top_mob_worth$company, top_mob_worth$device)
+
+top_mob_worth$company_device <-
+  factor(top_mob_worth$company_device,
+         levels = top_mob_worth$company_device[order(top_mob_worth$worth)])
+
+gold_value <- 34.934
+platin_value <- 26.03006
+
+ggplot(top_mob_worth,
+       aes(fill = as.factor((worth > gold_value) + (worth > platin_value)
+       ),
+       y = worth,
+       x = company_device)) +
+  geom_bar(stat = "identity") +
+  geom_hline(yintercept = gold_value,
+             color = "gold",
+             size = 1) +   #gold
+  geom_text(
+    aes(x = 1, label = "Gold", y = gold_value),
+    colour = "black",
+    angle = 0,
+    size = 3
+  ) +
+  geom_hline(yintercept = platin_value,
+             color = "grey",
+             size = 1) + #platinum
+  geom_text(
+    aes(x = 2, label = "Platinum", y = platin_value),
+    colour = "black",
+    angle = 0,
+    size = 3
+  ) +
+  ylab("€ / gr") +
+  xlab("Device Name") +
+  guides(fill = FALSE) +
+  coord_flip()
+```
+
+---
+
+<p dir="RTL">
+می دانیم که روند جهانی گوشی های موبایل این است که به مرور صفحه نمایش بخش بزرگتری از صفحه را اشغال می کند، حال سوالی که مطرح می شود این است که چه زمانی به جایی می رسیم که تمام صفحه ی موبایل بشود صفحه نمایش
+در این نمودار بالاترین و متوسط نسبت 
+مساحت به اندازه ی صفحه ی
+موبایل ها را بررسی می کنیم.
+</p>
+<p dir="RTL">
+سپس به آن یک مدل خطی فیت می کنیم
+و آن را امتداد 
+می دهیم تا
+سال ۲۰۲۲.
+مشاهده می کنیم که تا سال
+۲۰۲۲
+نسبت اندازه ی
+نمایشگر
+به کل
+صفحه ی موبایل ها
+به یک در
+بالاترین حد و به حدود ۰.۷ به طور 
+متوسط می رسد.
+</p>
+<p dir="RTL">
+و به این دلیل برایم جالب است که در 
+واقع این نمودار فاصله ی زمانی
+مدل های
+حال حاضر را تا زمانی که تمامِ صفحه، نمایشگر
+بشود را نشان می دهد.
+</p>
+
+```{r 10_B, echo=TRUE, fig.height=9, fig.width=16, message=FALSE, warning=FALSE, paged.print=FALSE}
+mob_ratio <- mobile
+mob_ratio %>%
+  filter(
+    !is.na(mob_ratio$dim_length),
+    !is.na(mob_ratio$display_size),
+    !is.na(mob_ratio$dim_breadth),
+    mob_ratio$dim_length != 0,
+    mob_ratio$display_size != 0,
+    mob_ratio$dim_breadth != 0,
+    !is.na(year)
+  ) -> mob_ratio
+mob_ratio$ratio <-
+  ((
+    mob_ratio$display_size / sqrt(
+      mob_ratio$dim_length * mob_ratio$dim_length +
+        mob_ratio$dim_breadth * mob_ratio$dim_breadth
+    )
+  ) ^ 2) * 645.16
+mob_ratio %>%
+  group_by(year) %>%
+  summarise(avg_ratio = mean(ratio, na.rm = T),
+            highest_ratio = max(ratio, na.rm = T)) -> mob_ratio
+
+ggplot(mob_ratio, aes(x = year)) +
+  geom_point(
+    aes(y = highest_ratio),
+    color = "darkblue",
+    alpha = 0.7,
+    stat = "identity"
+  ) +
+  geom_point(aes(y = avg_ratio),
+             shape = 15,
+             color = "red",
+             alpha = 0.7) +
+  xlab("Year") +
+  ylab(expression(frac("Display Area", "Total Area"))) +
+  theme(axis.title.y = element_text(angle = 360, vjust = 0.5)) +
+  stat_smooth(
+    method = 'lm',
+    formula = y ~ x,
+    aes(y = highest_ratio),
+    fullrange = T,
+    color = "darkblue",
+    alpha = 0.7
+  ) +
+  stat_smooth(
+    method = 'lm',
+    formula = y ~ x,
+    aes(y = avg_ratio),
+    fullrange = T,
+    color = "red",
+    alpha = 0.7
+  ) +
+  scale_y_continuous(limits = c(0, 1)) +
+  scale_x_continuous(limits = c(1998, 2022))
+```
+
+<p dir="RTL">
+نقاط آبی نسبت های بیشینه در هر سال و نقاط قرمز متوسط نسبت است.
+</p>
+
+---
+
+<p dir="RTL">
+در این نمودار ادعایی به نامِ قانون مور را در رم گوشی های موبایل بررسی می کنیم.
+یکی از بندهای قانون مور این است که اندازه ی رم ها طی هر ۱۸ ماه یا ۲ سال ۲ برابر می شود یا به عبارتی روند رشد حافظه ی اصلی در طی تاریخ نماییست.
+حال ما با گرفتن لگاریم از میانگین اندازه ی رم گوشی ها و فیت کردن یک مدل خطی و مشاهده ی خطی بودن روند این ادعا را بررسی می کنیم.
+</p>
+
+```{r 10_C, echo=TRUE, fig.height=9, fig.width=16, message=FALSE, warning=FALSE, paged.print=FALSE}
+mobile_ram_year <- mobile %>% 
+  filter(!is.na(ram), !is.na(year)) %>% 
+  group_by(year) %>%
+  summarize(log_avg_ram = log2(mean(ram)))
+ggplot(mobile_ram_year, aes(x = year, y = log_avg_ram)) +
+  geom_point()+
+  geom_smooth(method = "lm")+
+  ylab(expression(log(average(ram))))+
+  xlab("Year")
+```
+
+<p dir="RTL">
+همانطور که مشاهده می کنید این نمودار روندی خطی دارد که ادعای قانون مور را تایید می کند.
+که دلیل جالب بودن آن نیز هست.
+</p>
